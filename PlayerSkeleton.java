@@ -15,7 +15,7 @@ public class PlayerSkeleton {
             s.draw();
             s.drawNext(0, 0);
             try {
-                Thread.sleep(300);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -69,12 +69,12 @@ public class PlayerSkeleton {
     public double evalScore(Move move) {
         // weights
  //       double[] weights = new double[5];
-        
-        double rowsClearedWeight = 0.3;//0.760666;
-        double numHolesWeight = 0.8;//0.35663;
-        double spaceUsedWeight = 0.510066;
-        double heightVarWeight = 0.54483;
-        double maxHeightWeight = 0;
+        //0.12686429241639857, 0.6202792374104067, 0.6776074904252886, 0.2600545225318098, 0.10923504505223744
+        double rowsClearedWeight = 0.12686429241639857;//0.760666;
+        double numHolesWeight = 0.6202792374104067;//0.35663;
+        double spaceUsedWeight = 0.6776074904252886;
+        double heightVarWeight = 0.2600545225318098;
+        double maxHeightWeight = 0.10923504505223744;
 
         // find next state after applying move
         NextState nextState = move.getStateView().makeMoveView(move.getOrient(), move.getSlot(), move.getPiece());

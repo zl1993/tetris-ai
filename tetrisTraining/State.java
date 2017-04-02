@@ -1,4 +1,4 @@
-package tetris;
+package tetrisTraining;
 import java.awt.Color;
 
 
