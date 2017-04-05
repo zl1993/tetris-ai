@@ -69,12 +69,12 @@ public class PlayerSkeleton {
     public double evalScore(Move move) {
         // weights
  //       double[] weights = new double[5];
-        //0.12686429241639857, 0.6202792374104067, 0.6776074904252886, 0.2600545225318098, 0.10923504505223744
-        double rowsClearedWeight = 0.12686429241639857;//0.760666;
-        double numHolesWeight = 0.6202792374104067;//0.35663;
-        double spaceUsedWeight = 0.6776074904252886;
-        double heightVarWeight = 0.2600545225318098;
-        double maxHeightWeight = 0.10923504505223744;
+        //0.1693034145407168, 0.9513071845199775, 0.0021463310003033815, 0.21962220394263915, 0.13458259658716057
+        double rowsClearedWeight = 0.1693034145407168;//0.760666;
+        double numHolesWeight = 0.9513071845199775;//0.35663;
+        double spaceUsedWeight = 0.0021463310003033815;
+        double heightVarWeight = 0.21962220394263915;
+        double maxHeightWeight = 0.13458259658716057;
 
         // find next state after applying move
         NextState nextState = move.getStateView().makeMoveView(move.getOrient(), move.getSlot(), move.getPiece());

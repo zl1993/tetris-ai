@@ -49,7 +49,7 @@ public class Genepool {
 		Collections.sort(genepool, new Comparator<Gene>() {
 			@Override
 			public int compare(Gene o1, Gene o2) {
-				return o1.compareTo(o2);
+				return o2.compareTo(o1);
 			}
 		});
 	}
@@ -70,7 +70,8 @@ public class Genepool {
 	// Selects a fraction of the genepool, then take
 	// the 2 with the best fitness score and get their offspring gene
 	public void runTournament() {
-		PriorityQueue<Gene> tournament = new PriorityQueue<Gene>();
+		//ArrayList<Gene> tournament = new ArrayList<Gene>();
+		PriorityQueue<Gene> tournament = new PriorityQueue<Gene>(Collections.reverseOrder());
 		int numContenders = (int)(FRAC_IN_TOURNAMENT * geneNumber);
 		Set<Integer> chosenOnes = new HashSet<Integer>();
 		
@@ -81,9 +82,14 @@ public class Genepool {
 		for(int i : chosenOnes){
 			tournament.add(genepool.get(i));
 		}
-		//System.out.println("Fittest: " + tournament.peek().toWrite());
+		//int firstIndex = getMax(tournament, -1);
+		//int secondIndex = getMax(tournament, firstIndex);
+		//Gene parent1 = tournament.get(firstIndex);
+		//Gene parent2 = tournament.get(secondIndex);
+		Gene parent1 = tournament.poll();
+		Gene parent2 = tournament.poll();
 		// Create a new gene from the 2 fittest genes
-		Gene newGene = tournament.poll().waCrossover(tournament.poll());
+		Gene newGene = parent1.waCrossover(parent2);
 		
 		// Calculate fitness for the new gene
 		PlayerSkeleton.runGames(numGames, newGene);
@@ -107,6 +113,24 @@ public class Genepool {
 		newGenepool.addAll(offspringPool);
 		genepool = newGenepool;
 		offspringPool = new ArrayList<Gene>();
+	}
+	
+	public static int getMax(List<Gene> list, int index) {
+		int res = 0;
+		Gene current = null;
+		for(int i = 0; i < list.size(); i++) {
+			if(i != index) {
+				if(current != null) {
+					if(list.get(i).compareTo(current) > 0) {
+						res = i;
+					}
+				} else {
+					current = list.get(i);
+					res = i;
+				}
+			}	
+		}
+		return res;
 	}
 	
 	public void toFile(String filename) {

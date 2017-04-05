@@ -73,7 +73,7 @@ public class Gene implements Comparable<Gene>{
 	}
 	
 	public int compareTo(Gene other) {
-		return Double.compare(other.fitness, this.fitness);
+		return Double.compare(this.fitness, other.fitness);
 	}
 	
 	public String toWrite() {
