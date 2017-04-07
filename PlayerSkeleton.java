@@ -15,7 +15,7 @@ public class PlayerSkeleton {
             s.draw();
             s.drawNext(0, 0);
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);//change back to 300
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -75,6 +75,8 @@ public class PlayerSkeleton {
         double spaceUsedWeight = 0.0021463310003033815;
         double heightVarWeight = 0.21962220394263915;
         double maxHeightWeight = 0.13458259658716057;
+        double maxWellDepthWeight = 0.01;
+        double maxHeightDiffWeight = 0;
 
         // find next state after applying move
         NextState nextState = move.getStateView().makeMoveView(move.getOrient(), move.getSlot(), move.getPiece());
@@ -85,7 +87,7 @@ public class PlayerSkeleton {
         else
             return rowsClearedWeight * evalRowsCleared(nextState) - numHolesWeight * evalNumHoles(nextState)
                     - spaceUsedWeight * evalSpaceUsed(nextState) - heightVarWeight * evalHeightVar(nextState)
-                    - maxHeightWeight * evalMaxHeight(nextState);
+                    - maxHeightWeight * evalMaxHeight(nextState) - maxWellDepthWeight * evalMaxWellDepth(nextState) - maxHeightDiffWeight * evalMaxHeightDifference(nextState);
     }
 
     // MAXIMIZE - because it is the game's objective
@@ -154,14 +156,52 @@ public class PlayerSkeleton {
         int[] top = nextState.getStateView().getTop();
         int maxHeight = 0;
 
-        // find the sum of the absolute differences in heights of every adjacent
-        // column of the state after next move applied
+        // find the max height of all the column heights
         for (int i = 0; i < State.COLS; i++) {
             if (top[i] > maxHeight) {
                 maxHeight = top[i];
             }
         }
         return maxHeight;
+    }
+    
+    // MINIMIZE - to keep max well depth low
+    // maximum well depth heuristic component
+    public int evalMaxWellDepth(NextState nextState){
+        // get the top array of the state after next move is applied
+        int[] top = nextState.getStateView().getTop();
+        int currWellDepth = 0;
+        int maxWellDepth = 0;
+
+        // find the sum of the absolute differences in heights of every adjacent
+        // column of the state after next move applied
+        for (int i = 1; i < State.COLS; i++) {
+            currWellDepth = Math.abs(top[i] - top[i - 1]);
+            if (currWellDepth > maxWellDepth){
+                maxWellDepth = currWellDepth;
+            }
+        }
+        return maxWellDepth;
+    }
+    
+    // MINIMIZE - to keep height difference between max and min height low, further
+    // maximum height difference component
+    public int evalMaxHeightDifference(NextState nextState) {
+        // get the top array of the state after next move is applied
+        int[] top = nextState.getStateView().getTop();
+        int maxHeight = 0;
+        int minHeight = State.ROWS + 1;
+
+        // find the max and min heights among all columns
+        for (int i = 0; i < State.COLS; i++) {
+            if (top[i] > maxHeight) {
+                maxHeight = top[i];
+            }
+            if (top[i] < minHeight){
+                minHeight = top[i];
+            }
+        }
+        return maxHeight - minHeight;
     }
 
     /*
