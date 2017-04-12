@@ -12,21 +12,39 @@ public class PlayerSkeleton {
 
     private ArrayList<Move> movesList = new ArrayList<Move>();
     
-    // Genetic Algorithm constants
+    /*********** Genetic Algorithm constants ****************/
+    
+    // Number of heuristics to consider
     private final static int numHeuristics = 8;
+    // Chance for a gene to mutate when created
     private final static double mutationChance = 0.05;
+    // Maximum value a gene weight can mutate by
     private final static double maxMutationValue = 0.2;
+    // Number of generations to run
     private final static int numGenerations = 5;
+    // Number of genes in the genepool
 	private final static int numTotalGenes = 1000;
+	// Number of testing games to determine the fitness of a gene 
 	private final static int numGamesToTestGene = 50;
+	// Fraction of the genepool to randomly select for a tournament
     private final static double fracInTournament = 0.1;
+    // Maximum number of offsprings to be produced before introducing back into the gene pool
     private final static double offSpringPoolLimit = 0.3;
+    
+    /*********************************************************/
+    
+    /****************** Variables to change mode *****************/
+    
+    // If true, run the genetic algorithm to determine the best weights
+    static boolean RUNGENETICALGO = false;
+    // If true, run 1000 games using the preset gene to determine average scores for the gene
+    static boolean RUN1000GAMES = false;
+    // If both are false, runs a normal game of tetris using the preset gene.
+    
+    /*************************************************************/
     
     //global variable to keep track of score across all games (if running concurrently)
     static int totalScore = 0;
-    // If true, running this will start the genetic algorithm to determine the best weights
-    static boolean RUNGENETICALGO = false;
-    static boolean RUN1000GAMES = true;
     
     public static void main(String[] args) {
     	
@@ -34,17 +52,15 @@ public class PlayerSkeleton {
     	// According to the sequence: 
     	double rowsClearedWeight = 0.043912548209419186;
         double numHolesWeight = 0.5917809514378018;
-        double numVerticalConnectedHolesWeight = 0.5067604232755419;
-        //double totalHeightWeight = 0.510066;
         double heightVarWeight = 0.12359819496355709;
         double maxHeightWeight = 0.13116870871557984; 
-        double totalWellDepthWeight = 0.34906865318845726;
         double maxWellDepthWeight = -0.16780088200244983;
-        //double maxHeightDiffWeight = 0.192596;
+        double totalWellDepthWeight = 0.34906865318845726;
+        double numVerticalConnectedHolesWeight = 0.5067604232755419;
         double avgHeightDiffFromMeanWeight = 0.2572736406979075;
         
-    	double[] weightVector = {rowsClearedWeight, numHolesWeight, numVerticalConnectedHolesWeight, heightVarWeight, 
-    						maxHeightWeight, totalWellDepthWeight, maxWellDepthWeight, avgHeightDiffFromMeanWeight};
+    	double[] weightVector = {rowsClearedWeight, numHolesWeight, heightVarWeight, maxHeightWeight, maxWellDepthWeight,
+    						totalWellDepthWeight, numVerticalConnectedHolesWeight, avgHeightDiffFromMeanWeight};
     	Gene gene = new Gene(weightVector, false, mutationChance, maxMutationValue);
     	
         // run genetic algorithm if this variable is true, else, play the game using the preset weights
@@ -159,6 +175,7 @@ public class PlayerSkeleton {
             PlayerSkeleton p = new PlayerSkeleton();
             int numMoves = 0;
             // while it game is not lost, continue making next move
+            // stop when either game is lost or we have exceeded the number of moves
             while (!s.hasLost() && numMoves < 500) {
                 s.makeMove(p.chooseMove(s, s.getNextPiece(), s.legalMoves(), gene));
                 numMoves ++;
@@ -167,6 +184,7 @@ public class PlayerSkeleton {
 		}	
     }
     
+    // Run test games to determine the fitness of a gene
     public static double runGames(int numGames, Gene gene) {
     	ExecutorService executor = Executors.newFixedThreadPool(numGames);
     	int sum = 0;
@@ -176,7 +194,6 @@ public class PlayerSkeleton {
             try {
             	int resInt = res.get();
             	sum += resInt;
-            	//System.out.println("Game score: " + resInt);
             } catch(Exception e){
             	e.printStackTrace();
             }
@@ -237,13 +254,11 @@ public class PlayerSkeleton {
         // WEIGHTS
         double rowsClearedWeight = vector[0];
         double numHolesWeight = vector[1];
-        double numVerticalConnectedHolesWeight = vector[2];
-        //double totalHeightWeight = 0.510066;
-        double heightVarWeight = vector[3];
-        double maxHeightWeight = vector[4]; 
+        double heightVarWeight = vector[2];
+        double maxHeightWeight = vector[3]; 
+        double maxWellDepthWeight = vector[4];
         double totalWellDepthWeight = vector[5];
-        double maxWellDepthWeight = vector[6];
-        //double maxHeightDiffWeight = 0.192596;
+        double numVerticalConnectedHolesWeight = vector[6];
         double avgHeightDiffFromMeanWeight = vector[7];
 
         // find next state after applying move
@@ -722,7 +737,7 @@ public class PlayerSkeleton {
  * ******************************
  * ****************************** */
 
-
+// Gene class contains the vector of heuristic weights
 class Gene implements Comparable<Gene>{
     
     private final int numHeuristics;
@@ -770,7 +785,7 @@ class Gene implements Comparable<Gene>{
         fitness = fit;
     }
     
-    // 
+    // Random chance to mutate a gene
     public void mutate() {
         if (Math.random() < mutChance){
             int randIndex = (int)(Math.floor(Math.random() * numHeuristics));
@@ -780,7 +795,7 @@ class Gene implements Comparable<Gene>{
     }
     
     // Weighted average crossover to produce offspring genes from parent genes
-    // using the fitness-weighted average of their param vectors
+    // using the fitness-weighted average of their weight vectors
     public Gene waCrossover(Gene other) {
         double[] newVector = new double[numHeuristics];
         for(int i=0; i<numHeuristics; i++){
@@ -813,12 +828,20 @@ class Gene implements Comparable<Gene>{
     
 }
 
+// This class runs the genetic algorithm by running tournaments on the gene pool
+// so as to continually produce better genes from the initial pool. 
 class Genepool {
+	// Number of heuristics to consider
 	private final int numHeuristics;
+	// Chance for a gene to mutate when being formed
 	private final double mutChance;
+	// Maximum value a gene weight can mutate by
 	private final double mutMax;
+	// Fraction of the genepool to select at random for 1 tournament
 	private final double fracInTournament;
+	// Maximum number of offspring genes to be produced before introducing the offsprings into the genepool 
 	private final double offspringPoolLimit;
+	// Number of testing games to run to determine a genes fitness
 	private final int numGames;
     private int geneNumber;
     private List<Gene> genepool;
