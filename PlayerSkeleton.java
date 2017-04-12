@@ -31,22 +31,21 @@ public class PlayerSkeleton {
     public static void main(String[] args) {
     	
     	// Generated gene weights
-    	double[] weightVector = {-0.089549398670927, 0.6123248582652504, 0.47849007613157757, 0.1332054724602824, 0.07932967180087527, 0.3836767505682369, -0.25038782845705204, 0.37018409072846764};
     	// According to the sequence: 
-    	double rowsClearedWeight = 0.900283;
-        double numHolesWeight = 6.302734;
-        double numVerticalConnectedHolesWeight = 0.200001;
+    	double rowsClearedWeight = 0.043912548209419186;
+        double numHolesWeight = 0.5917809514378018;
+        double numVerticalConnectedHolesWeight = 0.5067604232755419;
         //double totalHeightWeight = 0.510066;
-        double heightVarWeight = 0.900192;
-        double maxHeightWeight = 0.800240; 
-        double totalWellDepthWeight = 1.301027;
-        double maxWellDepthWeight = 0.100021;
+        double heightVarWeight = 0.12359819496355709;
+        double maxHeightWeight = 0.13116870871557984; 
+        double totalWellDepthWeight = 0.34906865318845726;
+        double maxWellDepthWeight = -0.16780088200244983;
         //double maxHeightDiffWeight = 0.192596;
-        double avgHeightDiffFromMeanWeight = 0.871003;
+        double avgHeightDiffFromMeanWeight = 0.2572736406979075;
         
-    	//double[] weightVector = {rowsClearedWeight, numHolesWeight, numVerticalConnectedHolesWeight, heightVarWeight, 
-    	//					maxHeightWeight, totalWellDepthWeight, maxWellDepthWeight, avgHeightDiffFromMeanWeight};
-    	Gene gene = new Gene(weightVector, true, mutationChance, maxMutationValue);
+    	double[] weightVector = {rowsClearedWeight, numHolesWeight, numVerticalConnectedHolesWeight, heightVarWeight, 
+    						maxHeightWeight, totalWellDepthWeight, maxWellDepthWeight, avgHeightDiffFromMeanWeight};
+    	Gene gene = new Gene(weightVector, false, mutationChance, maxMutationValue);
     	
         // run genetic algorithm if this variable is true, else, play the game using the preset weights
     	if(RUNGENETICALGO) {
